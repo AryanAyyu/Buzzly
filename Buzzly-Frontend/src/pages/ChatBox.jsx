@@ -89,16 +89,21 @@ const ChatBox = () => {
       <div className='p-5 md:px-10 h-full overflow-y-scroll'>
         <div className='space-y-4 max-w-4xl mx-auto'>
           {
-            [...messages].sort((a,b)=>new Date(a.createdAt) - new Date(b.createdAt)).map((message,index)=>(
-              <div key={index} className={`flex flex-col ${message.from_user_id._id === currentUserId ? 'items-end' : 'items-start'}`}>
-                <div className={`p-2 text-sm max-w-sm text-slate-700 rounded-lg shadow ${message.from_user_id._id === currentUserId ? 'rounded-br-none bg-blue-50' : 'rounded-bl-none bg-gray-50'}`}>
-                  {message.message_type === 'image' && <img src={message.media_url} className='w-full max-w-sm rounded-lg mb-1' alt="" />
-                  }
-                  
-                  <p>{message.text}</p>
+            [...messages].sort((a,b)=>new Date(a.createdAt) - new Date(b.createdAt)).map((message,index)=>{
+              // Fix the comparison - convert both IDs to string for reliable comparison
+              const isMyMessage = String(message.from_user_id._id) === String(currentUserId);
+              
+              return (
+                <div key={index} className={`flex flex-col ${isMyMessage ? 'items-end' : 'items-start'}`}>
+                  <div className={`p-2 text-sm max-w-sm text-slate-700 rounded-lg shadow ${isMyMessage ? 'rounded-br-none bg-blue-50' : 'rounded-bl-none bg-gray-50'}`}>
+                    {message.message_type === 'image' && <img src={message.media_url} className='w-full max-w-sm rounded-lg mb-1' alt="" />
+                    }
+                    
+                    <p>{message.text}</p>
+                  </div>
                 </div>
-              </div>
-            ))
+              )
+            })
           }
           <div ref={messageEndRef}/>
         </div>
