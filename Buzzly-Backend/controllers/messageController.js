@@ -7,7 +7,7 @@ const connections ={};
 
 // Controller function for the SSE endpoint 
 export const sseController = (req,res)=>{
-    const {userId} = req.params
+    const {userId} = req.params;
     console.log('New Client connected: ',userId)
 
     // Set SSE headers 
@@ -17,10 +17,10 @@ export const sseController = (req,res)=>{
     res.setHeader('Access-Control-Allow-Origin','*');
 
     // Add the clients response object to the connection object 
-    connections[userId] = res
+    connections[userId] = res;
 
     // Send an initial event to the client 
-    res.write('log: COnnected to SSE stream\n\n');
+    res.write('log: Connected to SSE stream\n\n');
 
     // Handle client disconnection 
     req.on('close',()=>{
@@ -33,7 +33,7 @@ export const sseController = (req,res)=>{
 
 // Send MEssage 
 
-export const sendMessage = async (params) => {
+export const sendMessage = async (req,res) => {
     try {
         const {userId} = req.auth();
         const {to_user_id,text} = req.body;
@@ -69,10 +69,11 @@ export const sendMessage = async (params) => {
         res.json({success:true,message});
 
         // Send message to to_user_id using SSE 
-        const messageWithUserData = await Message.findById(message._id).populate('from_user_id');
+        const messageWithUserData = await Message.findById(message._id)
+    .populate('from_user_id', 'username full_name profile_picture');
         
-        if(connections[to_user_id]){
-            connections[to_user_id].write(`data : ${JSON.stringify(messageWithUserData)}\n\n`)
+        if (connections[to_user_id]) {
+            connections[to_user_id].write(`event: message\ndata: ${JSON.stringify(messageWithUserData)}\n\n`);
         }
 
     } catch (error) {
@@ -92,7 +93,11 @@ export const getChatMessages = async (req,res)=>{
                 {from_user_id:userId,to_user_id},
                 {from_user_id:to_user_id,to_user_id:userId},
             ]
-        }).sort({createdAt:-1})
+        })
+        .populate('from_user_id', 'username full_name profile_picture') // Add this line
+        .populate('to_user_id', 'username full_name profile_picture')   // Add this line
+        .sort({createdAt:-1})
+        
         // mark messages as seen 
         await Message.updateMany({from_user_id:to_user_id,to_user_id:userId},{seen : true})
         res.json({success:true,messages});
@@ -105,7 +110,7 @@ export const getChatMessages = async (req,res)=>{
 export const getUserRecentMessages = async (req,res) => {
     try {
         const {userId} = req.auth();
-        const messages = await Message.find({to_user_id:userId}.populate('from_user_id to_user_id')).sort({createdAt:-1});
+        const messages = await Message.find({to_user_id:userId}).populate('from_user_id to_user_id').sort({createdAt:-1});
         res.json({success:true,messages});
     } catch (error) {
         console.log(error);
