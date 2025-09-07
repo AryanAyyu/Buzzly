@@ -77,6 +77,19 @@ const ChatBox = () => {
     messageEndRef.current?.scrollIntoView({behavior: 'smooth'});
   }, [messages])
 
+  // Helper function to determine if a message is from the current user
+  const isMyMessage = (message) => {
+    // Check different possible structures of the message object
+    if (message.from_user_id && message.from_user_id._id) {
+      return String(message.from_user_id._id) === String(currentUserId);
+    } else if (message.from_user_id) {
+      return String(message.from_user_id) === String(currentUserId);
+    } else if (message.senderId) {
+      return String(message.senderId) === String(currentUserId);
+    }
+    return false;
+  }
+
   return user && (
     <div className='flex flex-col h-screen'>
       <div className='flex items-center gap-2 p-2 md:px-10 xl:pl-42 bg-gradient-to-r from-indigo-50 to-purple-50 border-b border-gray-300 '>
@@ -90,12 +103,11 @@ const ChatBox = () => {
         <div className='space-y-4 max-w-4xl mx-auto'>
           {
             [...messages].sort((a,b)=>new Date(a.createdAt) - new Date(b.createdAt)).map((message,index)=>{
-              // Fix the comparison - convert both IDs to string for reliable comparison
-              const isMyMessage = String(message.from_user_id._id) === String(currentUserId);
+              const myMessage = isMyMessage(message);
               
               return (
-                <div key={index} className={`flex flex-col ${isMyMessage ? 'items-end' : 'items-start'}`}>
-                  <div className={`p-2 text-sm max-w-sm text-slate-700 rounded-lg shadow ${isMyMessage ? 'rounded-br-none bg-blue-50' : 'rounded-bl-none bg-gray-50'}`}>
+                <div key={index} className={`flex flex-col ${myMessage ? 'items-end' : 'items-start'}`}>
+                  <div className={`p-2 text-sm max-w-sm text-slate-700 rounded-lg shadow ${myMessage ? 'rounded-br-none bg-blue-50' : 'rounded-bl-none bg-gray-50'}`}>
                     {message.message_type === 'image' && <img src={message.media_url} className='w-full max-w-sm rounded-lg mb-1' alt="" />
                     }
                     
