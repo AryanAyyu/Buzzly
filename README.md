@@ -10,10 +10,14 @@ Buzzly demonstrates strong expertise in full-stack development, real-time commun
 UI design.
 
 ## Table of Contents
-- [Features](#features)
-- [Tech Stack](#tech-stack)
-- [Installation](#installation)
-- [License](#license)
+- [Demo](#-demo)
+- [Features](#-features)
+- [Tech Stack](#-tech-stack)
+- [Installation](#-installation)
+- [License](#-license)
+
+## 🔗 Demo
+Check out the live project here: [Buzzly Live Demo](https://buzzly-self.vercel.app/)
 
 ## ✨ Features
 - User authentication
